@@ -1,0 +1,35 @@
+{
+  "dbConfig": {
+    "host": "mongo:27017",
+    "username": "",
+    "password": "",
+    "name": "",
+    "optionalParams": ""
+  },
+  "instagram": {
+    "clientId": "",
+    "clientSecret": ""
+  },
+  "security": {
+    "secret": ""
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 9000,
+    "domain": "localhost:9000",
+    "apiBaseRoot": "/api",
+    "sslEnabled": true
+  },
+  "mail": {
+    "service": "SES",
+    "noReply": "no-reply@pond5.com"
+  },
+  "aws": {
+    "accessKeyId": "",
+    "secretAccessKey": "",
+    "region": "eu-west-1",
+    "S3": {
+      "bucket": ""
+    }
+  }
+}

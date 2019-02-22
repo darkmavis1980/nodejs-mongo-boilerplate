@@ -1,0 +1,13 @@
+{
+  "apps" : [{
+    "name"        : "app",
+    "script"      : "./server.js",
+    "watch"       : ["./server.js", "server/"],
+    "env": {
+      "NODE_ENV": "docker"
+    },
+    "env_production" : {
+       "NODE_ENV": "production"
+    }
+  }]
+}

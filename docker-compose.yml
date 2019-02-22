@@ -1,0 +1,27 @@
+version: "3"
+services:
+  web:
+    container_name: app
+    build: .
+    ports:
+      - "9000:9000"
+    command: pm2-runtime .docker/pm2/docker.json
+    environment:
+      - NODE_ENV=docker
+    volumes:
+      - .:/app/
+    depends_on:
+      - mongo
+    networks:
+      - webnet
+  mongo:
+    container_name: mongo
+    image: mongo
+    volumes:
+      - ./data:/data/db
+    ports:
+      - "27017:27017"
+    networks:
+      - webnet
+networks:
+  webnet:
