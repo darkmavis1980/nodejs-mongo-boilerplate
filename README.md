@@ -54,15 +54,15 @@ If you wish to use a self hosted solution for MongoDB, remember that you need to
 use <dbname>
 
 db.createUser({
-	user: "<username>",
+  user: "<username>",
   pwd: "<password>",
   roles: [
-		{
-			role: "userAdmin",
-			db: "<dbname>"
-		},
+    {
+      role: "userAdmin",
+      db: "<dbname>"
+    },
     "readWrite"
-	]
+  ]
 })
 ```
 
@@ -76,7 +76,7 @@ Also once you entered the user as shown above, to enable only the valid users to
 
 ```yaml
 security:
-	authorization: enabled
+  authorization: enabled
 ```
 
 This will tell to MongoDB to allow connections only with the valid users, and not to be open to the public as it's by default (and I don't understand why they do that).
