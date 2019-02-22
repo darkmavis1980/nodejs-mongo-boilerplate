@@ -1,4 +1,6 @@
-# Pages Manager CMS
+# Express.js + MongoDB boilerplate
+
+This is a simple Node.js boilerplate that uses Express.js, MongoDB with Mongoose, and it has a basic user model
 
 ## Docker
 
