@@ -4,7 +4,29 @@ This is a simple Node.js boilerplate that uses Express.js, MongoDB with Mongoose
 
 ## Docker
 
-> Todo
+To start the server, and it's the first run, you need to build it first with:
+
+```bash
+docker-compose build
+```
+
+And then you can simply start it with:
+
+```bash
+docker-compose up
+```
+
+To access to the console of each container, you can run this command:
+
+```bash
+// access to the web container
+$ docker-compose exec web /bin/bash
+
+// access to the mongo container
+$ docker-compose exec mongo /bin/bash
+```
+
+> Be aware that before you can start the server properly, you will need to install **npm dependencies** with `npm install`, and after you start it with **docker-compose** you will need to access to the mongo instance, add a user to the database you want to use, and then update the `config/docker.json` file (if you don't have it, just copy the `config/docker.sample.json` file).
 
 ---
 
