@@ -100,13 +100,13 @@ Here a few examples with all the cases:
 mongodump --out /data/backup/
 
 // backup only one database
-mongodump --out /data/backup/ --db yavin
+mongodump --out /data/backup/ --db mydb
 
 // backup only one collection of one database
-mongodump --out /data/backup/ --db yavin --collection events
+mongodump --out /data/backup/ --db mydb --collection events
 
 // backup only one database with authentication
-mongodump --username <username> --password <password> --authenticationDatabase yavin --out /data/backup/ --db yavin
+mongodump --username <username> --password <password> --authenticationDatabase mydb --out /data/backup/ --db mydb
 ```
 
 #### Restore a backup
@@ -124,13 +124,13 @@ And if you want to restore one database, or even one collection of a database, i
 mongorestore /data/backup/
 
 // restore only one database
-mongorestore /data/backup/ --db ecetoc
+mongorestore /data/backup/ --db mydb
 
 // restore only one collection of one database
-mongorestore /data/backup/ --db ecetoc --collection threads
+mongorestore /data/backup/ --db mydb --collection threads
 
 //restore only one database with authentication
-mongorestore /data/backup/ --username <username> --password <password> --authenticationDatabase yavin --db yavin
+mongorestore /data/backup/ --username <username> --password <password> --authenticationDatabase mydb --db mydb
 ```
 
 ---
