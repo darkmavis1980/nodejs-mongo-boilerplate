@@ -4,7 +4,7 @@
   "description": "Serverside code for Pool Stats App",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha server/tests/integration/*.spec.js --timeout 10000"
   },
   "keywords": [
     "pool"
@@ -28,5 +28,10 @@
     "passport-local": "^1.0.0",
     "sha.js": "^2.4.11",
     "validator": "^10.11.0"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.2.1",
+    "mocha": "^6.0.2"
   }
 }
