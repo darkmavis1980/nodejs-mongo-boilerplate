@@ -1,5 +1,5 @@
 {
-  "name": "poolstats-server",
+  "name": "nodejs-mongo-server",
   "version": "0.1.0",
   "description": "Serverside code for Pool Stats App",
   "main": "index.js",
@@ -7,7 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "pool"
+    "nodejs",
+    "mongodb",
+    "express"
   ],
   "author": "Alessio Michelini",
   "license": "ISC",
@@ -20,10 +22,10 @@
     "express": "^4.16.4",
     "express-session": "^1.15.6",
     "file-stream-rotator": "^0.4.1",
-    "jsonwebtoken": "^8.5.0",
-    "mongoose": "^5.4.15",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.4.21",
     "morgan": "^1.9.1",
-    "nodemailer": "^5.1.1",
+    "nodemailer": "^6.0.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
     "sha.js": "^2.4.11",
