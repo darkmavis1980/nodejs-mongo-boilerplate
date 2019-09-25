@@ -31,14 +31,16 @@ class Core{
    * Create db connection
    */
   dbConnect(){
-    let that = this;
-    let databaseUri = this.getConnectionString();
+    const databaseUri = this.getConnectionString();
     mongoose.Promise = require('bluebird');
-    this.db = mongoose.connect(databaseUri, { useNewUrlParser: true }, (err) => {
+    this.db = mongoose.connect(databaseUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    }, (err) => {
       if(err){
         console.log('cannot connect with the DB');
         mongoose.disconnect();
-        setTimeout(that.dbConnect.bind(that),5000);
+        setTimeout(this.dbConnect.bind(this),5000);
       } else {
         console.log('connected');
       }// end if

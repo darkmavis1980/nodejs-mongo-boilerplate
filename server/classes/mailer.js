@@ -6,23 +6,23 @@ const mailService = config.get('mail.service') || 'SES';
 
 const transports = {
   SES: () => {
-    // const aws = require('aws-sdk');
-    // return nodemailer.createTransport({
-    //   SES: new aws.SES({
-    //     accessKeyId: config.get('aws.accessKeyId'),
-    //     secretAccessKey: config.get('aws.secretAccessKey'),
-    //     region: config.get('aws.region'),
-    //     apiVersion: '2010-12-01'
-    //   })
-    // });
+    const aws = require('aws-sdk');
+    return nodemailer.createTransport({
+      SES: new aws.SES({
+        accessKeyId: config.get('aws.accessKeyId'),
+        secretAccessKey: config.get('aws.secretAccessKey'),
+        region: config.get('aws.region'),
+        apiVersion: '2010-12-01'
+      })
+    });
   },
   sendgrid: () => {
-    // let sgTransport = require('nodemailer-sendgrid-transport');
-    // return nodemailer.createTransport(sgTransport({
-    //   auth: {
-    //     api_key: config.get('mail.sendgrid.key')
-    //   }
-    // }));
+    let sgTransport = require('nodemailer-sendgrid-transport');
+    return nodemailer.createTransport(sgTransport({
+      auth: {
+        api_key: config.get('mail.sendgrid.key')
+      }
+    }));
   }
 }
 

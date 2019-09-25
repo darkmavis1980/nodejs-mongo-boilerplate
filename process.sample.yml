@@ -1,0 +1,9 @@
+apps:
+  - script: server.js
+    env:
+      NODE_ENV: development
+    instances: max
+    exec_mode: cluster
+    watch:
+      - server.js
+      - server
