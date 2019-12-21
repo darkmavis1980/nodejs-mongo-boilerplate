@@ -6,10 +6,6 @@
     "name": "",
     "optionalParams": ""
   },
-  "instagram": {
-    "clientId": "",
-    "clientSecret": ""
-  },
   "security": {
     "secret": ""
   },

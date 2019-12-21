@@ -2,3 +2,4 @@ node_modules/
 data/
 config/*
 !config/*.sample.json
+.DS_Store
