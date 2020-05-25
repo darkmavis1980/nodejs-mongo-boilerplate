@@ -14,12 +14,22 @@ const http = require('http').Server(app);
 const Core = require('./server/classes/core');
 const session = require('express-session');
 const MongoStore = require('connect-mongo')(session);
+const helmet = require('helmet');
+const mongoSanitize = require('express-mongo-sanitize');
+// const { rateLimit } = require('express-rate-limit');
 
 /**
  * Connect to MongoDB
  */
 const db = Core.dbConnect();
 app.db = db;
+
+app.use(helmet());
+
+/**
+ * Sanitize MongoDB request
+ */
+app.use(mongoSanitize());
 
 /**
  * Add compression
@@ -109,6 +119,17 @@ const usersApiRouter = require('./server/routes/users')(app, express);
  * Assign the API routes to the main app
  */
 app.use(apiBasePath, usersApiRouter);
+
+/**
+ * To add a rate limit
+ */
+// const limit = rateLimit({
+//   max: 100,// max requests
+//   windowMs: 60 * 60 * 1000, // 1 Hour
+//   message: 'Too many requests' // message to send
+// });
+// app.use('/routeName', limit);
+
 
 
 // app.get('/*', Core.noCache, function ( req, res ) {
