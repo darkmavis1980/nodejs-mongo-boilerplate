@@ -46,6 +46,8 @@ PM2 has some handy commands to monitoring the server status, these ones are the 
 
 ## MongoDB
 
+On first initialization of this application with docker-compose, an empty database called `test` will be created, username and password are both `test`, just to get you started, if you use this repo as a starting point, and you wish to change this info, please change both the `docker-compose.yml` file and the `.docker/init/db.js` file with your credentials.
+
 ### Create admin user on MongoDB
 
 If you wish to use a self hosted solution for MongoDB, remember that you need to create a MongoDB user and associate it with the database you want to use, here you can find a simple template of how to do it.
@@ -107,6 +109,9 @@ mongodump --out /data/backup/ --db mydb --collection events
 
 // backup only one database with authentication
 mongodump --username <username> --password <password> --authenticationDatabase mydb --out /data/backup/ --db mydb
+
+//backup an archive with docker
+docker-compose exec -T mongo sh -c 'mongodump --host=localhost -u <username> -p <password> --archive' > your-host-file.archive
 ```
 
 #### Restore a backup
@@ -131,6 +136,9 @@ mongorestore /data/backup/ --db mydb --collection threads
 
 //restore only one database with authentication
 mongorestore /data/backup/ --username <username> --password <password> --authenticationDatabase mydb --db mydb
+
+//restore an archive with docker
+docker-compose exec -T mongo sh -c 'mongorestore --nsInclude=mydb.* --host=localhost -u <username> -p <password> --archive' < your-host-file.archive
 ```
 
 ---

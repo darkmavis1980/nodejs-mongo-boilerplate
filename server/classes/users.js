@@ -8,8 +8,7 @@ const Core = require('./core');
 const moment = require('moment');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
-// const Mailgen = require('mailgen');
-//const UserLogger = require('./logger');
+
 /**
  * This class manages the Users module and it's a singleton class
  * @class
