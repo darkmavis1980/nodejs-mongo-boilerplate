@@ -32,11 +32,7 @@ class Core{
    */
   dbConnect(){
     const databaseUri = this.getConnectionString();
-    mongoose.Promise = require('bluebird');
-    this.db = mongoose.connect(databaseUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    }, (err) => {
+    this.db = mongoose.connect(databaseUri, {}, (err) => {
       if(err){
         console.log('cannot connect with the DB');
         mongoose.disconnect();
@@ -45,7 +41,7 @@ class Core{
         console.log('connected');
       }// end if
     });
-    mongoose.set('useCreateIndex', true);
+    // mongoose.set('useCreateIndex', true);
     return mongoose;
   }
 
