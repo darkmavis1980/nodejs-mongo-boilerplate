@@ -360,9 +360,9 @@ module.exports = (app, express) => {
     *     HTTP/1.1 200 OK
     * {
     *     "__v": 0,
-    *     "username": "tester@pond5.com",
+    *     "username": "tester@test.com",
     *     "company": "",
-    *     "email": "tester@pond5.com",
+    *     "email": "tester@test.com",
     *     "lastname": "John",
     *     "firstname": "Doe",
     *     "_id": "597b61190e6a5d2149646c4e",
@@ -421,10 +421,10 @@ module.exports = (app, express) => {
     *  [
     *    {
     *        "_id": "596cc28c92628b1f504860fe",
-    *        "email": "alessio@musicphotographer.eu",
-    *        "username": "alessio@musicphotographer.eu",
-    *        "lastname": "Michelini",
-    *        "firstname": "Alessio",
+    *        "email": "test@test.com",
+    *        "username": "test@test.com",
+    *        "lastname": "Test",
+    *        "firstname": "Test",
     *        "__v": 0,
     *        "last_login": "2017-07-27T13:58:26.641Z",
     *        "tokens": [
@@ -487,10 +487,10 @@ module.exports = (app, express) => {
     *     HTTP/1.1 200 OK
     *    {
     *        "_id": "596cc28c92628b1f504860fe",
-    *        "email": "alessio@musicphotographer.eu",
-    *        "username": "alessio@musicphotographer.eu",
-    *        "lastname": "Michelini",
-    *        "firstname": "Alessio",
+    *        "email": "test@test.com",
+    *        "username": "test@test.com",
+    *        "lastname": "Test",
+    *        "firstname": "Test",
     *        "__v": 0,
     *        "last_login": "2017-07-27T13:58:26.641Z",
     *        "tokens": [
@@ -570,11 +570,11 @@ module.exports = (app, express) => {
     *     HTTP/1.1 200 OK
     *    {
     *        "_id": "596cc28c92628b1f504860fe",
-    *        "email": "alessio@pond5.com",
-    *        "username": "alessio@pond5.com",
-    *        "lastname": "Michelini",
-    *        "firstname": "Alessio",
-    *        "company": "Pond5",
+    *        "email": "test@test.com",
+    *        "username": "test@test.com",
+    *        "lastname": "Test",
+    *        "firstname": "Test",
+    *        "company": "Test",
     *        "__v": 0,
     *        "last_login": "2017-07-27T13:58:26.641Z",
     *        "tokens": [

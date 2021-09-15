@@ -13,7 +13,7 @@ const fs = require('fs');
 const http = require('http').Server(app);
 const Core = require('./server/classes/core');
 const session = require('express-session');
-const MongoStore = require('connect-mongo')(session);
+const MongoStore = require('connect-mongo');
 const helmet = require('helmet');
 const mongoSanitize = require('express-mongo-sanitize');
 // const { rateLimit } = require('express-rate-limit');
@@ -50,11 +50,11 @@ let shouldCompress = (req, res) => {
 const sess = {
   secret: config.get('security.secret'),
   cookie: {},
-  store: new MongoStore({
+  store: MongoStore.create({
     autoRemove: 'interval',
     autoRemoveInterval: 10, // In minutes. Default
     collection: 'sessions',
-    mongooseConnection: db.connection
+    mongoUrl: Core.getConnectionString()
   }),
   resave: true,
   saveUninitialized: true
