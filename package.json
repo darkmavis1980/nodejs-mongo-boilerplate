@@ -14,7 +14,7 @@
   "author": "Alessio Michelini",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.990.0",
+    "aws-sdk": "^2.992.0",
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.19.0",
     "config": "^3.3.6",
