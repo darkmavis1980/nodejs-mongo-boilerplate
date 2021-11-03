@@ -33,6 +33,6 @@
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "sha.js": "^2.4.11",
-    "validator": "^13.6.0"
+    "validator": "^13.7.0"
   }
 }
