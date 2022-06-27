@@ -5,7 +5,7 @@ services:
     build: .
     ports:
       - "9000:9000"
-    command: pm2-runtime .docker/pm2/docker.json
+    command: npm run dev
     environment:
       - NODE_ENV=docker
     volumes:

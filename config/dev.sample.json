@@ -1,9 +1,9 @@
 {
   "dbConfig": {
     "host": "localhost:27017",
-    "username": "",
-    "password": "",
-    "name": "",
+    "username": "test",
+    "password": "test",
+    "name": "test",
     "optionalParams": ""
   },
   "security": {

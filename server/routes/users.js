@@ -5,10 +5,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const config = require('config');
 const secretKey = config.get('security.secret');
-const bodyParser = require('body-parser');
 const UsersCtrl = require('../controllers/users');
-const jsonParser = bodyParser.json();
-const urlencodedParser = bodyParser.urlencoded({ extended: false });
 const isAdmin = require('../middlewares/middlewares').isAdmin;
 const isAuthenticated = require('../middlewares/middlewares').isAuthenticated;
 
@@ -16,6 +13,9 @@ module.exports = (app, express) => {
   app.use(require('express-session')({ secret: secretKey, resave: true, saveUninitialized: true }));
   app.use(passport.initialize());
   app.use(passport.session());
+
+  const urlencodedParser = express.urlencoded({ extended: true });
+  const jsonParser = express.json();
 
   passport.serializeUser((user, done) => {
     done(null, user);
