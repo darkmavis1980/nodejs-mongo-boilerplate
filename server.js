@@ -24,7 +24,10 @@ const mongoSanitize = require('express-mongo-sanitize');
 const db = Core.dbConnect();
 app.db = db;
 
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+}));
 
 /**
  * Sanitize MongoDB request
@@ -69,6 +72,8 @@ if (serverEnv === 'production') {
 }
 
 app.use(session(sess));
+
+app.use(express.json());
 
 /**
  * Set static files location
