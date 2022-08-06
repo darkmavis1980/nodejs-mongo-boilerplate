@@ -2,7 +2,7 @@
   "name": "nodejs-mongo-server",
   "version": "0.7.0",
   "description": "Sample Node.js / MongoDB application",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
