@@ -1,6 +1,6 @@
 {
   "name": "nodejs-mongo-server",
-  "version": "0.7.1",
+  "version": "0.7.2",
   "description": "Sample Node.js / MongoDB application",
   "main": "server.js",
   "scripts": {
