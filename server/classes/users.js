@@ -181,92 +181,89 @@ class Users {
   /**
    * Delete a user
    */
-  deleteUser(req, callback) {
-    User.deleteOne({
-      _id: req.params.user_id
-    }, (err, user) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        callback(null, 'User deleted successfully');
-      }
-    });
+  async deleteUser(req, callback) {
+    try {
+      await User.deleteOne({
+        _id: req.params.user_id
+      });
+      return 'User deleted successfully';
+    } catch (error) {
+      throw new Error('Cannot delete the user');
+    }
   }
 
   /**
    * Registration method for new users
    */
-  register(req, callback) {
-    let that = this;
-    let user = new User();
-    if (!req.body.email && validator.isEmail(req.body.email)) {
-      return callback('The email is not valid', null);
-    } // end if
-    user.firstname = validator.trim(req.body.firstname);
-    if (!req.body.firstname) {
-      return callback('Firstname Required', null);
-    } // end if
-    user.lastname = validator.trim(req.body.lastname);
-    if (!req.body.lastname) {
-      return callback('Lastname Required', null);
-    } // end if
-    user.username = req.body.email;
-    user.email = req.body.email;
-    user.company = req.body.company;
-
-    let securityToken = user.generateToken();
-    user.tokens = [{
-      token: securityToken,
-      expiry: moment().add(1, 'days')
-    }];
-
-    if (user.passwordTooShort(req.body.password)) {
-      return callback('Password is too short, must be at least 12 characters long', null);
-    } // end if
-    if ((!req.body.password || !req.body.conf_password) || (req.body.password !== req.body.conf_password)) {
-      return callback('Password do not match', null);
-    } // end if
-    user.password = req.body.password;
-
-    // save the user and check for errors
-    user.save((err) => {
-      if (err) {
-        //duplicate entry
-        if (err.code === 11000) {
-          return callback('A user with that email already exists', null);
-        } else {
-          return callback(err, null);
-        } // end if
+  async register(req, callback) {
+    try {
+      const user = new User();
+      if (!req.body.email && validator.isEmail(req.body.email)) {
+        throw new Error('The email is not valid');
       } // end if
-      that.sendActivationEmail(user);
-      return callback(null, 'User created!');
-    });
+      user.firstname = validator.trim(req.body.firstname);
+      if (!req.body.firstname) {
+        throw new Error('Firstname Required');
+      } // end if
+      user.lastname = validator.trim(req.body.lastname);
+      if (!req.body.lastname) {
+        throw new Error('Lastname Required');
+      } // end if
+      user.username = req.body.email;
+      user.email = req.body.email;
+      user.company = req.body.company;
+
+      let securityToken = user.generateToken();
+      user.tokens = [{
+        token: securityToken,
+        expiry: moment().add(1, 'days')
+      }];
+
+      if (user.passwordTooShort(req.body.password)) {
+        throw new Error('Password is too short, must be at least 12 characters long');
+      } // end if
+      if ((!req.body.password || !req.body.conf_password) || (req.body.password !== req.body.conf_password)) {
+        throw new Error('Password do not match');
+      } // end if
+      user.password = req.body.password;
+
+      // save the user and check for errors
+      const data = await user.save();
+      this.sendActivationEmail(user);
+      return data;
+    
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new Error('A user with that email already exists');
+      } else {
+        throw new Error(error.message);
+      } // end if
+    }
   }
   /**
    * Send the activation emails for newly created users
    */
   sendActivationEmail(user) {
-    let that = this;
     let token = this.generateAuthToken(user);
 
 
     // Configure mailgen by setting a theme and your product info
-    // let mailGenerator = new Mailgen({
+    // const mailGenerator = new Mailgen({
     //   theme: 'salted',
     //   product: {
     //     // Appears in header & footer of e-mails
-    //     name: 'ECETOC',
-    //     link: 'https://metrics.cremeglobal.com/'
+    //     name: 'Test',
+    //     link: 'https://example.com/'
     //     // Optional logo
     //     // logo: 'https://mailgen.js/img/logo.png'
     //   }
     // });
 
     // // Prepare email contents
-    // let email = {
+    // const email = {
     //   body: {
     //     name: user.firstname,
-    //     intro: 'Hi, in order to activate your account on metrics.cremeglobal.com we need to check if you email is valid.',
+    //     intro: 'Hi, in order to activate your account on example.com we need to check if you email is valid.',
     //     action: {
     //       instructions: 'Click the button below to activate your account',
     //       button: {
@@ -282,157 +279,149 @@ class Users {
     // // Generate an HTML email using mailgen
     // let emailBody = mailGenerator.generate(email);
 
-    // // let message = '<p>Hi, in order to activate your account on minifigsarchiver.com we need to confirm your account, to do so please click on the link below:</p>\
+    // // let message = '<p>Hi, in order to activate your account on example.com we need to confirm your account, to do so please click on the link below:</p>\
     // //  <p><a href="http://'+config.domain+'/index.html#/activation/'+token+'">Activate your account</a></p>\
-    // //  <p>Best Regards<br />The Minifigs Archiver Team</p>';
+    // //  <p>Best Regards<br />The Test Team</p>';
     // Mailer.sendMail({
-    //   from: `Metrics Mailer < $ {
+    //   from: `Test Mailer < $ {
     //     config.get('mail.noReply')
     //   } > `,
     //   to: user.email,
-    //   subject: 'Welcome to ECETOC',
+    //   subject: 'Welcome to Test',
     //   html: emailBody
     // });
   }
   /**
    * Find the user by its email and send the change password email
    */
-  forgotPassword(req, callback) {
-    let that = this;
-    let email = req.body.email.trim();
-    if (!validator.isEmail(email)) {
-      return callback('Email is not valid', null);
-    } // end if
-    User.findOne({
-      email: email
-    }, (err, user) => {
-      if (err) {
-        callback(err, null);
-      } else {
-        if (user) {
-          user.issueNewSecurityToken();
-          // if we found a user, we send him an email
-          // let token = that.generateAuthToken(user);
+  async forgotPassword(req) {
+    try {
+      const email = req.body.email.trim();
+      if (!validator.isEmail(email)) {
+        throw new Error('Email is not valid');
+      } // end if
+      const user = await User.findOne({
+        email: email
+      });
+      user.issueNewSecurityToken();
+      // if we found a user, we send him an email
+      // let token = this.generateAuthToken(user);
 
-          // // Configure mailgen by setting a theme and your product info
-          // let mailGenerator = new Mailgen({
-          //   theme: 'salted',
-          //   product: {
-          //     // Appears in header & footer of e-mails
-          //     name: 'ECETOC',
-          //     link: 'https://metrics.cremeglobal.com/'
-          //     // Optional logo
-          //     // logo: 'https://mailgen.js/img/logo.png'
-          //   }
-          // });
+      // // Configure mailgen by setting a theme and your product info
+      // let mailGenerator = new Mailgen({
+      //   theme: 'salted',
+      //   product: {
+      //     // Appears in header & footer of e-mails
+      //     name: 'Test',
+      //     link: 'https://example.com/'
+      //     // Optional logo
+      //     // logo: 'https://mailgen.js/img/logo.png'
+      //   }
+      // });
 
-          // // Prepare email contents
-          // let email = {
-          //   body: {
-          //     name: user.firstname,
-          //     intro: 'Hi, you received this email because you requested to reset your password account:',
-          //     action: {
-          //       instructions: 'Click here to reset your password',
-          //       button: {
-          //         color: 'green',
-          //         text: 'Activate',
-          //         link: `http: //${config.get('server.domain')}/reset-pwd/${token}`
-          //       }
-          //     },
-          //     outro: [`If you haven 't request it, please ignore this email.`,`Best Regards`, `The Yavin Team`]
-          //   }
-          // };
+      // // Prepare email contents
+      // let email = {
+      //   body: {
+      //     name: user.firstname,
+      //     intro: 'Hi, you received this email because you requested to reset your password account:',
+      //     action: {
+      //       instructions: 'Click here to reset your password',
+      //       button: {
+      //         color: 'green',
+      //         text: 'Activate',
+      //         link: `http: //${config.get('server.domain')}/reset-pwd/${token}`
+      //       }
+      //     },
+      //     outro: [`If you haven 't request it, please ignore this email.`,`Best Regards`, `The Test Team`]
+      //   }
+      // };
 
-          // // let message = `<p>Hi, you received this email because you requested to reset your password account:</p>\
-          // //  <p><a href="http://${config.get('              server.domain ')}/reset-pwd/${token}">Click here to reset your password</a></p>\
-          // //  <p>If you haven\'t request it, please ignore this email.</p>\
-          // //  <p>Best Regards<br />The ECETOC Team</p>`;
+      // // let message = `<p>Hi, you received this email because you requested to reset your password account:</p>\
+      // //  <p><a href="http://${config.get('server.domain ')}/reset-pwd/${token}">Click here to reset your password</a></p>\
+      // //  <p>If you haven\'t request it, please ignore this email.</p>\
+      // //  <p>Best Regards<br />The Test Team</p>`;
 
-          // // Generate an HTML email using mailgen
-          // let emailBody = mailGenerator.generate(email);
+      // // Generate an HTML email using mailgen
+      // let emailBody = mailGenerator.generate(email);
 
-          //  Mailer.sendMail({
-          //    from: `Yavin Mailer<${config.get('mail.noReply ')}>`,
-          //    to: req.body.email,
-          //    subject: 'Yavin password reset ',
-          //    html: emailBody
-          //  });
+      //  Mailer.sendMail({
+      //    from: `Yavin Mailer<${config.get('mail.noReply ')}>`,
+      //    to: req.body.email,
+      //    subject: 'Test password reset ',
+      //    html: emailBody
+      //  });
 
-          //  callback(null, {
-          //    success: true,
-          //    message: 'Email sent!'
-          //  });
-        } else {
-          callback('The email passed does not exists ', null);
-        }
-      }
-    });
+      //  callback(null, {
+      //    success: true,
+      //    message: 'Email sent!'
+      //  });
+    } catch (error) {
+      throw new Error('The email passed does not exists');
+    }
   }
 
   /**
    * Reset the password for a specific user
    */
-  resetPassword(req, callback){
-    let that = this;
+  async resetPassword(req, callback){
     let new_password = req.body.new_password;
     let conf_new_password = req.body.conf_new_password;
     const token = req.body.token;
-    this.decodeAuthToken(token).then((data) => {
-      let user = data.user;
+    try {
+      const data = await this.decodeAuthToken(token)
+      let { user } = data;
       if((!new_password || !conf_new_password) || (new_password !== conf_new_password)){
-        return callback('Password do not match ', null)
+        throw new Error('Password do not match')
       }// end if
       user.password = new_password;
       user.tokens = user.markTokenAsUsed(data.securityToken);
-      user.save((err, data) => {
-        if(err){
-          callback(err, null)
-        } else {
-          callback(null, data)
-        }
-      });
-    }, (err) => {
-      callback(err,null);
-    });
+      const userData = await user.save();
+      return userData;
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 
   /**
    * Get the user data
    * @alias getUserById
    */
-  getUser(req, callback){
+  async getUser(req) {
     const userId = req.params.id;
-    getUserById(userId, callback);
+    return getUserById(userId);
   }
   /**
    * Get ther user data
    */
-  getUserById(userId, callback){
-    User.findById(userId, (err, user) => {
-      callback(err, user);
-    });
+  async getUserById(userId) {
+    try {
+      const user = await User.findById(userId);
+      return user;
+    } catch (error) {
+      throw new Error('Cannot find the user');
+    }
   }
   /**
    * Get the list of users that are active and admins
    */
-  getAdmins(callback){
+  async getAdmins() {
     let query = User.find({
       is_admin: true,
       active: true
     });
-    query.exec((err, users) => {
-      if(err){
-        callback(err, null);
-      } else {
-        callback(null, users);
-      }
-    });
+
+    try {
+      const users = await query.exec();
+      return users;
+    } catch (error) {
+      throw new Error('Cannot find the admins');
+    }
   }
 
   /**
    * Get the full list of users
    */
-  getUsers(req, callback){
+  async getUsers(req, callback){
     const offset = 0;
 
     let limit = 20;
@@ -449,43 +438,33 @@ class Users {
     }// end if
 
     let queryFilter = {};
-    User.countDocuments(queryFilter, (err, count) => {
-      if(err){
-        callback(err, null);
-      } else {
-        let query = User.find(queryFilter);
-        query.sort(' +email ');
-        query.select(' -tokens ');
-        if(limit && page){
-          query.limit(limit);
-          query.skip(offset);
-        }// end if
-        query.exec();
-        query.then(list => {
-          callback(null, {
-            list: list,
-            count: count,
-            pages: Math.ceil(count/limit),
-            limit: limit,
-            page: page
-          });
-        }, err => {
-          callback(err, null);
-        });
+    try {
+      const count = await  User.countDocuments(queryFilter);
+
+      let query = User.find(queryFilter);
+      query.sort(' +email ');
+      query.select(' -tokens ');
+      if(limit && page){
+        query.limit(limit);
+        query.skip(offset);
       }// end if
-    });
+      const list = await query.exec();
+      return {
+        list,
+        count: count,
+        pages: Math.ceil(count/limit),
+        limit: limit,
+        page: page
+      }
+    } catch (error) {
+      throw new Error('cannot find the users');
+    }
   }
 
-  getMe(req, callback){
-    User
+  async getMe(req) {
+    return User
       .findById(req.decoded.id, ' -tokens -last_login -registration_date')
-      .exec((err, data) => {
-      if(err){
-        callback(err, null);
-      } else {
-        callback(null, data);
-      }
-    });
+      .exec();
   }
 };
 

@@ -30,18 +30,22 @@ class Core{
   /**
    * Create db connection
    */
-  dbConnect(){
+  async dbConnect(){
     const databaseUri = this.getConnectionString();
-    this.db = mongoose.connect(databaseUri, {}, (err) => {
-      if(err){
-        console.log('cannot connect with the DB');
-        mongoose.disconnect();
-        setTimeout(this.dbConnect.bind(this),5000);
-      } else {
+    try {
+      // mongoose.Promise = require('bluebird');
+      this.db = await mongoose.connect(databaseUri, {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      });
+      if (!silent) {
         console.log('connected');
-      }// end if
-    });
-    // mongoose.set('useCreateIndex', true);
+      }
+    } catch (error) {
+      console.log('cannot connect with the DB');
+      mongoose.disconnect();
+      setTimeout(this.dbConnect.bind(this),5000);
+    }
     return mongoose;
   }
 

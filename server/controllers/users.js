@@ -173,91 +173,73 @@ let UsersCtrl = {
       }
     });
   },
-  GetUser: (req, res) => {
-    Users.getUserById(req.params.user_id, (err, user) => {
-      if(err){
-        return res
-          .status(400)
-         .json({message: 'Could not find the user', error: err})
-         .end();
-      }
-      // if everything is okay and the user is found, return the user data
+  GetUser: async (req, res) => {
+    try {
+      const user = await Users.getUserById(req.params.user_id);
       return res
-        .status(200)
-        .json(user)
+      .status(200)
+      .json(user)
+      .end();
+    } catch (error) {
+      return res
+        .status(400)
+        .json({message: 'Could not find the user', error})
         .end();
-    });
+    }
   },
-  GetUsers: (req, res) => {
-    Users.getUsers(req, (err, data) => {
-      if(err){
-        return res
-          .status(400)
-          .json({
-            error: err
-          })
-          .end();
-      } else {
-        res
-          .status(200)
-          .json(data)
-          .end();
-      }
-    });
+  GetUsers: async (req, res) => {
+    try {
+      const data = await Users.getUsers(req);
+      res
+        .status(200)
+        .json(data)
+        .end();
+    } catch (error) {
+      return res
+        .status(400)
+        .json({
+          error
+        })
+        .end();
+    }
   },
-  GetMe: (req, res) => {
-    Users.getMe(req, (err, data) => {
-      if(err){
-        return res
-          .status(400)
-          .json({
-            error: err
-          })
-          .end();
-      } else {
-        let response = {};
-        //converts the mongoose document to plain object
-        if(typeof data === 'object'){
-          response = data.toObject();
-        }
-        // attach the system settings
-        //response.settings = Core.getSettings();
-        res.send(response);
+  GetMe: async (req, res) => {
+    try {
+      const data = await Users.getMe(req);
+      let response = {};
+      //converts the mongoose document to plain object
+      if(typeof data === 'object'){
+        response = data.toObject();
       }
-    });
+      res.send(response);
+    } catch (error) {
+      return res
+        .status(400)
+        .json({
+          error
+        })
+        .end();
+    }
   },
-  PostUserSettings: (req, res) => {
-    User.findById(req.decoded.id, (err, user) => {
-      if(err){
-        res.status(400);
-        return res.json({
-          success: false,
-          error: err
-        });
-      }
+  PostUserSettings: async (req, res) => {
+    try {
+      const user = await User.findById(req.decoded.id);
 
       user.userSettings = req.body.settings;
-      user.save((err, data) => {
-        if(err){
-          res.status(400);
-          res.json({
-            success: false,
-            error: err
-          });
-          res.end();
-        }
-        res.json(data);
+
+      const data = await user.save();
+      return res.json(data).end();
+    } catch (error) {
+      res.status(400);
+      return res.json({
+        success: false,
+        error
       });
-    });
+    }
   },
-  PatchMe: (req, res) => {
-    User.findById(req.decoded.id, (err, user) => {
-      if(err){
-        res.status(404)
-        .json({message: 'Cannot find this user', error: err})
-        .end();
-      }// end if
-      //remove some security values
+  PatchMe: async (req, res) => {
+    try {
+      let user = await User.findById(req.decoded.id);
       const readOnlyFields = ['active', 'is_admin', 'registration_date'];
       readOnlyFields.forEach(field => {
         if(!req.body[field]){
@@ -265,17 +247,14 @@ let UsersCtrl = {
         }
       });
       // update the user object
-      user = Object.assign(user, req.body);
-
-      user.save((err) => {
-        if(err){
-          res.status(500)
-          .json({message: 'Cannot save this user', error: err})
-          .end();
-        }// end if
-        res.json(user).end();
-      });
-    });
+      user = { ...user, ...req.body };
+      const data = await user.save();
+      return res.json(data).end();
+    } catch (error) {
+      res.status(404)
+      .json({message: 'Cannot find/update this user', error})
+      .end();
+    }
   },
   PatchMeUpdatePassword: (req, res) => {
     User.findOne({ _id: req.decoded.id })
