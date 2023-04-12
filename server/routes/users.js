@@ -31,18 +31,17 @@ module.exports = (app, express) => {
       passwordField: 'password',
       passReqToCallback: true
     },
-    function(req, username, password, done){
-      let query = { username: username };
-      if(!req.params.admin){
-        query.is_admin = true;
-      }// end if
+    async function(req, username, password, done) {
+      try {
+        let query = { username: username };
+        if(!req.params.admin){
+          query.is_admin = true;
+        }// end if
 
-      User.findOne(query).select('username +password email firstname active is_admin tokens')
-      .exec((err, user) => {
-
-        if (err) {
-          return done(err);
-        }
+        const user = await User
+          .findOne(query)
+          .select('username +password email firstname active is_admin tokens')
+          .exec();
 
         if (!user) {
           return done(null, false);
@@ -52,7 +51,10 @@ module.exports = (app, express) => {
           return done(null, false);
         }
         return done(null, user);
-      });
+
+      } catch (error) {
+        done(error);
+      }
     }
   ));
 

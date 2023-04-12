@@ -37,34 +37,29 @@ class Users {
    */
   decodeAuthToken(token) {
     return new Promise((resolve, reject) => {
-      jwt.verify(token, secretKey, (err, decoded) => {
+      jwt.verify(token, secretKey, async (err, decoded) => {
         if (err) {
           return reject('Token expired or not valid');
         }
-        User.findById(decoded.id, (err, user) => {
-          if (err) {
-            return reject('Token not valid for this user');
+        try {
+          const user = await User.findById(decoded.id);
+          const encryptedEmail = Core.decode64(decoded.email);
+          const decodedSecurityToken = decoded.securityToken;
+          const userSecurityToken = user.getLastToken();
+          if (!userSecurityToken || !userSecurityToken) {
+            return reject('Token expired or invalid');
           } else {
-            if (!user) {
-              let encryptedEmail = Core.decode64(decoded.email);
-              let decodedSecurityToken = decoded.securityToken;
-              let userSecurityToken = user.getLastToken();
-              if (!userSecurityToken || !userSecurityToken) {
-                return reject('Token expired or invalid');
-              } else {
-                if (encryptedEmail === user.email && userSecurityToken.token === decodedSecurityToken) {
-                  return resolve({
-                    user, securityToken: decoded.securityToken
-                  });
-                } else {
-                  return reject('Email do not match');
-                }
-              }
+            if (encryptedEmail === user.email && userSecurityToken.token === decodedSecurityToken) {
+              return resolve({
+                user, securityToken: decoded.securityToken
+              });
             } else {
-              return reject('User not found');
+              return reject('Email do not match');
             }
           }
-        });
+        } catch (error) {
+          reject('Token not valid for this user or user does not exists');
+        }
       });
     });
   }
@@ -72,90 +67,82 @@ class Users {
   /**
    * Activate an user
    */
-  activate(req, callback) {
-    const token = req.body.token;
-    if (!token) {
-      return callback('No token has been passed', null);
-    }
-    this.decodeAuthToken(token).then((data) => {
-      let user = data.user;
+  async activate(req) {
+    try {
+      const token = req.body.token;
+      if (!token) {
+        throw new Error('No token has been passed');
+      }
+      const data = await this.decodeAuthToken(token)
+      const { user } = data;
       user.active = true;
       user.tokens = user.markTokenAsUsed(data.securityToken);
-      user.save((err) => {
-        if (err) {
-          callback(err, null);
-        } else {
-          callback(null, {
-            success: true
-          });
-        }
-      });
-    }, (err) => {
-      callback(err, null);
-    });
+      await user.save();
+      return {
+        success: true
+      };
+    } catch (error) {
+      throw error;
+    }
   }
 
   /**
    * Log the last time a user logged in the system
    */
-  logAuthentication(user) {
+  async logAuthentication(user) {
     user.last_login = Date.now();
-    user.save();
+    await user.save();
     //UserLogger.log(user);
   }
 
   /**
    * Create a new user
    */
-  newUser(req, callback) {
-    //create a new instance of a user
-    let user = new User();
-    // set the user info
-    user.firstname = req.body.firstname;
-    user.lastname = req.body.lastname;
-    user.email = req.body.email;
-    user.company = req.body.company || '';
-    user.username = req.body.email;
-    user.password = req.body.password;
-    user.active = req.body.active || false;
-    user.is_admin = req.body.isAdmin || false;
+  async newUser(req) {
+    try {
+      //create a new instance of a user
+      const user = new User();
+      // set the user info
+      user.firstname = req.body.firstname;
+      user.lastname = req.body.lastname;
+      user.email = req.body.email;
+      user.company = req.body.company || '';
+      user.username = req.body.email;
+      user.password = req.body.password;
+      user.active = req.body.active || false;
+      user.is_admin = req.body.isAdmin || false;
 
-    if ((!req.body.password || !req.body.conf_password) || (req.body.password !== req.body.conf_password)) {
-      return callback('Passwords do not match', null);
-    } // end if
+      if ((!req.body.password || !req.body.conf_password) || (req.body.password !== req.body.conf_password)) {
+        throw new Error('Passwords do not match');
+      } // end if
 
-    // save the user and check for errors
-    user.save((err) => {
-      if (err) {
-        //duplicate entry
-        if (err.code === 11000) {
-          return callback('A user with that username already exists', null);
-        } else {
-          return callback(err, null);
-        }
+      // save the user and check for errors
+      const data = await user.save();
+      delete data.password;
+      return data;
+    } catch (error) {
+      if (error.code === 11000) {
+        throw new Error('A user with that username already exists');
       } else {
-        callback(null, user);
+        throw error;
       }
-    });
+    }
   }
 
   /**
    * Update the user details
    */
-  patchUser(req, callback) {
-    //we need to retrieve the user data
-    User.findById(req.params.user_id, (err, user) => {
-      if (err) {
-        return callback({
-          message: 'Could not find the user',
-          error: err
-        }, null);
-      }
+  async patchUser(req) {
+    try {
+      //we need to retrieve the user data
+      let user =  await User.findById(req.params.user_id)
       // fields that should be removed in case somebody tries to pass them
       const ignoreFields = ['_id', 'username', 'tokens'];
 
       if ((!req.body.password || !req.body.conf_password) || (req.body.password !== req.body.conf_password)) {
-        return callback('Passwords do not match', null);
+        throw new Error('Passwords do not match', { cause: {
+          code: 'notMatch'
+        }});
       } else if (req.body.password === '') {
         ignoreFields.push('password');
       } // end if
@@ -165,23 +152,21 @@ class Users {
           delete req.body[field];
         }
       });
-      user = Object.assign(user, req.body);
-      user.save(err => {
-        if (err) {
-          return callback({
-            message: 'Could not save the user details',
-            error: err
-          });
-        }
-        return callback(null, user);
-      });
-    });
+      user = { ...user, ...req.body };
+      const data = await user.save();
+      return data;
+    } catch (error) {
+      if (error.cause.code) {
+        throw new Error(error.message);
+      }
+      throw new Error('Could not find the user');
+    }
   }
 
   /**
    * Delete a user
    */
-  async deleteUser(req, callback) {
+  async deleteUser(req) {
     try {
       await User.deleteOne({
         _id: req.params.user_id
@@ -195,7 +180,7 @@ class Users {
   /**
    * Registration method for new users
    */
-  async register(req, callback) {
+  async register(req) {
     try {
       const user = new User();
       if (!req.body.email && validator.isEmail(req.body.email)) {
@@ -363,7 +348,7 @@ class Users {
   /**
    * Reset the password for a specific user
    */
-  async resetPassword(req, callback){
+  async resetPassword(req){
     let new_password = req.body.new_password;
     let conf_new_password = req.body.conf_new_password;
     const token = req.body.token;
@@ -421,7 +406,7 @@ class Users {
   /**
    * Get the full list of users
    */
-  async getUsers(req, callback){
+  async getUsers(req){
     const offset = 0;
 
     let limit = 20;

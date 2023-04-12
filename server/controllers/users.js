@@ -57,41 +57,37 @@ let UsersCtrl = {
       });
     })(req, res, next);
   },
-  PostRegister: (req, res) => {
-    Users.register(req, (err, msg) => {
-      if(err){
-        res.status(400).json({message: err}).end();
-      } else {
-        res.status(200).json({message: msg}).end();
-      }
-    });
+  PostRegister: async (req, res) => {
+    try {
+      const msg = await Users.register(req);
+      res.status(200).json({message: msg}).end();
+    } catch (error) {
+      res.status(400).json({error}).end();
+    }
   },
-  PostActivate: (req, res) => {
-    Users.activate(req, (err, msg) => {
-      if(err){
-        res.status(400).json({message: err}).end();
-      } else {
-        res.status(200).json({message: 'User successfully activated'}).end();
-      }
-    });
+  PostActivate: async (req, res) => {
+    try {
+      const msg = await Users.activate(req);
+      res.status(200).json({message: 'User successfully activated'}).end();
+    } catch (error) {
+      res.status(400).json({error}).end();
+    }
   },
-  PostForgotPassword: (req, res) => {
-    Users.forgotPassword(req, (err, result) => {
-      if(err){
-        res.status(400).json({message: err}).end()
-      } else {
-        res.status(200).json({message: 'Reset password email sent'}).end();
-      }
-    });
+  PostForgotPassword: async (req, res) => {
+    try {
+      await Users.forgotPassword(req);
+      res.status(200).json({message: 'Reset password email sent'}).end();
+    } catch (error) {
+      res.status(400).json({error}).end()
+    }
   },
-  PostPasswordReset: (req, res) => {
-    Users.resetPassword(req, (err, result) => {
-      if(err){
-        res.status(400).json({message: err}).end()
-      } else {
-        res.status(200).json({message: 'Password has been reset'}).end();
-      }
-    });
+  PostPasswordReset: async (req, res) => {
+    try {
+      await Users.resetPassword(req);
+      res.status(200).json({message: 'Password has been reset'}).end();
+    } catch (error) {
+      res.status(400).json({error}).end()
+    }
   },
   GetLogout: (req, res) => {
     req.logout();
@@ -125,61 +121,58 @@ let UsersCtrl = {
       return res.status(404).json({message: 'You don\'t have a valid token'}).end();
     }
   },
-  PostUsers: (req, res) => {
-    Users.newUser(req, (err, user) => {
-      if(err){
-        res
-          .status(400)
-          .json({message: err})
-          .end();
-      } else {
-        res
-          .status(200)
-          .json(user)
-          .end();
-      }
-    });
+  PostUsers: async (req, res) => {
+    try {
+      const user = await  Users.newUser(req);
+      res
+        .status(200)
+        .json(user)
+        .end();
+    } catch (error) {
+      res
+        .status(400)
+        .json({error})
+        .end();
+    }
   },
-  PatchUser: (req, res) => {
-    Users.patchUser(req, (err, user) => {
-      if(err){
-        return res
+  PatchUser: async (req, res) => {
+    try {
+      const user = await Users.patchUser(req);
+      return res
+        .status(200)
+        .json(user)
+        .end();
+    } catch (error) {
+      return res
           .status(400)
           .json({
             message: 'Could not save the user details',
-            error: err
+            error,
           })
           .end();
-      } else {
-        return res
-          .status(200)
-          .json(user)
-          .end();
-      }
-    });
+    }
   },
-  DeleteUser: (req, res) => {
-    Users.deleteUser(req, (err, msg) => {
-      if(err){
-        res
-          .status(400)
-          .json({message: err})
-          .end();
-      } else {
-        res
-          .status(200)
-          .json({message: msg})
-          .end();
-      }
-    });
+  DeleteUser: async (req, res) => {
+    try {
+      const msg = await Users.deleteUser(req);
+      res
+        .status(200)
+        .json({message: msg})
+        .end();
+    } catch (error) {
+      res
+        .status(400)
+        .json({error})
+        .end();
+    }
   },
   GetUser: async (req, res) => {
     try {
       const user = await Users.getUserById(req.params.user_id);
       return res
-      .status(200)
-      .json(user)
-      .end();
+        .status(200)
+        .json(user)
+        .end();
     } catch (error) {
       return res
         .status(400)
@@ -256,40 +249,30 @@ let UsersCtrl = {
       .end();
     }
   },
-  PatchMeUpdatePassword: (req, res) => {
-    User.findOne({ _id: req.decoded.id })
-    .select('username password')
-    .exec((err, user) => {
-      if(err){
-        res.status(404)
-        .json({message: 'Cannot find this user', error: err})
-        .end();
-      }// end if
-
+  PatchMeUpdatePassword: async (req, res) => {
+    try {
+      const user = await User.findOne({ _id: req.decoded.id })
+      .select('username password')
+      .exec();
       // we check if the password match
       if(user.comparePassword(req.body.old_password)){
         if(req.body.password === req.body.conf_password && req.body.password.length > 7){
           user.password = req.body.password;
-          user.save((err) => {
-            if(err){
-              res.status(500)
-              .json({message: 'Cannot save the new password', error: err})
-              .end();
-            } else {
-              res.json({message: 'The password has been updated'});
-            }
-          });
+          await user.save();
+          return res.json({message: 'The password has been updated'}).end();
         } else {
-          res.status(500)
-          .json({message: 'The two passwords do not match or one of them is too short'})
-          .end();
+          throw new Error('The two passwords do not match or one of them is too short');
         }
-      } else {
-        res.status(500)
+      }
+      return res
+        .status(500)
         .json({message: 'The current password is not correct'})
         .end();
-      }// end if
-    });
+    } catch (error) {
+      res.status(404)
+        .json({message: 'Cannot find this user', error})
+        .end();
+    }
   }
 }
 
