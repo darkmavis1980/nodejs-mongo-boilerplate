@@ -57,41 +57,37 @@ let UsersCtrl = {
       });
     })(req, res, next);
   },
-  PostRegister: (req, res) => {
-    Users.register(req, (err, msg) => {
-      if(err){
-        res.status(400).json({message: err}).end();
-      } else {
-        res.status(200).json({message: msg}).end();
-      }
-    });
+  PostRegister: async (req, res) => {
+    try {
+      const msg = await Users.register(req);
+      res.status(200).json({message: msg}).end();
+    } catch (error) {
+      res.status(400).json({error}).end();
+    }
   },
-  PostActivate: (req, res) => {
-    Users.activate(req, (err, msg) => {
-      if(err){
-        res.status(400).json({message: err}).end();
-      } else {
-        res.status(200).json({message: 'User successfully activated'}).end();
-      }
-    });
+  PostActivate: async (req, res) => {
+    try {
+      const msg = await Users.activate(req);
+      res.status(200).json({message: 'User successfully activated'}).end();
+    } catch (error) {
+      res.status(400).json({error}).end();
+    }
   },
-  PostForgotPassword: (req, res) => {
-    Users.forgotPassword(req, (err, result) => {
-      if(err){
-        res.status(400).json({message: err}).end()
-      } else {
-        res.status(200).json({message: 'Reset password email sent'}).end();
-      }
-    });
+  PostForgotPassword: async (req, res) => {
+    try {
+      await Users.forgotPassword(req);
+      res.status(200).json({message: 'Reset password email sent'}).end();
+    } catch (error) {
+      res.status(400).json({error}).end()
+    }
   },
-  PostPasswordReset: (req, res) => {
-    Users.resetPassword(req, (err, result) => {
-      if(err){
-        res.status(400).json({message: err}).end()
-      } else {
-        res.status(200).json({message: 'Password has been reset'}).end();
-      }
-    });
+  PostPasswordReset: async (req, res) => {
+    try {
+      await Users.resetPassword(req);
+      res.status(200).json({message: 'Password has been reset'}).end();
+    } catch (error) {
+      res.status(400).json({error}).end()
+    }
   },
   GetLogout: (req, res) => {
     req.logout();
@@ -125,139 +121,118 @@ let UsersCtrl = {
       return res.status(404).json({message: 'You don\'t have a valid token'}).end();
     }
   },
-  PostUsers: (req, res) => {
-    Users.newUser(req, (err, user) => {
-      if(err){
-        res
-          .status(400)
-          .json({message: err})
-          .end();
-      } else {
-        res
-          .status(200)
-          .json(user)
-          .end();
-      }
-    });
+  PostUsers: async (req, res) => {
+    try {
+      const user = await  Users.newUser(req);
+      res
+        .status(200)
+        .json(user)
+        .end();
+    } catch (error) {
+      res
+        .status(400)
+        .json({error})
+        .end();
+    }
   },
-  PatchUser: (req, res) => {
-    Users.patchUser(req, (err, user) => {
-      if(err){
-        return res
-          .status(400)
-          .json({
-            message: 'Could not save the user details',
-            error: err
-          })
-          .end();
-      } else {
-        return res
-          .status(200)
-          .json(user)
-          .end();
-      }
-    });
-  },
-  DeleteUser: (req, res) => {
-    Users.deleteUser(req, (err, msg) => {
-      if(err){
-        res
-          .status(400)
-          .json({message: err})
-          .end();
-      } else {
-        res
-          .status(200)
-          .json({message: msg})
-          .end();
-      }
-    });
-  },
-  GetUser: (req, res) => {
-    Users.getUserById(req.params.user_id, (err, user) => {
-      if(err){
-        return res
-          .status(400)
-         .json({message: 'Could not find the user', error: err})
-         .end();
-      }
-      // if everything is okay and the user is found, return the user data
+  PatchUser: async (req, res) => {
+    try {
+      const user = await Users.patchUser(req);
       return res
         .status(200)
         .json(user)
         .end();
-    });
-  },
-  GetUsers: (req, res) => {
-    Users.getUsers(req, (err, data) => {
-      if(err){
-        return res
+    } catch (error) {
+      return res
           .status(400)
           .json({
-            error: err
+            message: 'Could not save the user details',
+            error,
           })
           .end();
-      } else {
-        res
-          .status(200)
-          .json(data)
-          .end();
-      }
-    });
+    }
   },
-  GetMe: (req, res) => {
-    Users.getMe(req, (err, data) => {
-      if(err){
-        return res
-          .status(400)
-          .json({
-            error: err
-          })
-          .end();
-      } else {
-        let response = {};
-        //converts the mongoose document to plain object
-        if(typeof data === 'object'){
-          response = data.toObject();
-        }
-        // attach the system settings
-        //response.settings = Core.getSettings();
-        res.send(response);
-      }
-    });
+  DeleteUser: async (req, res) => {
+    try {
+      const msg = await Users.deleteUser(req);
+      res
+        .status(200)
+        .json({message: msg})
+        .end();
+    } catch (error) {
+      res
+        .status(400)
+        .json({error})
+        .end();
+    }
   },
-  PostUserSettings: (req, res) => {
-    User.findById(req.decoded.id, (err, user) => {
-      if(err){
-        res.status(400);
-        return res.json({
-          success: false,
-          error: err
-        });
+  GetUser: async (req, res) => {
+    try {
+      const user = await Users.getUserById(req.params.user_id);
+      return res
+        .status(200)
+        .json(user)
+        .end();
+    } catch (error) {
+      return res
+        .status(400)
+        .json({message: 'Could not find the user', error})
+        .end();
+    }
+  },
+  GetUsers: async (req, res) => {
+    try {
+      const data = await Users.getUsers(req);
+      res
+        .status(200)
+        .json(data)
+        .end();
+    } catch (error) {
+      return res
+        .status(400)
+        .json({
+          error
+        })
+        .end();
+    }
+  },
+  GetMe: async (req, res) => {
+    try {
+      const data = await Users.getMe(req);
+      let response = {};
+      //converts the mongoose document to plain object
+      if(typeof data === 'object'){
+        response = data.toObject();
       }
+      res.send(response);
+    } catch (error) {
+      return res
+        .status(400)
+        .json({
+          error
+        })
+        .end();
+    }
+  },
+  PostUserSettings: async (req, res) => {
+    try {
+      const user = await User.findById(req.decoded.id);
 
       user.userSettings = req.body.settings;
-      user.save((err, data) => {
-        if(err){
-          res.status(400);
-          res.json({
-            success: false,
-            error: err
-          });
-          res.end();
-        }
-        res.json(data);
+
+      const data = await user.save();
+      return res.json(data).end();
+    } catch (error) {
+      res.status(400);
+      return res.json({
+        success: false,
+        error
       });
-    });
+    }
   },
-  PatchMe: (req, res) => {
-    User.findById(req.decoded.id, (err, user) => {
-      if(err){
-        res.status(404)
-        .json({message: 'Cannot find this user', error: err})
-        .end();
-      }// end if
-      //remove some security values
+  PatchMe: async (req, res) => {
+    try {
+      let user = await User.findById(req.decoded.id);
       const readOnlyFields = ['active', 'is_admin', 'registration_date'];
       readOnlyFields.forEach(field => {
         if(!req.body[field]){
@@ -265,52 +240,39 @@ let UsersCtrl = {
         }
       });
       // update the user object
-      user = Object.assign(user, req.body);
-
-      user.save((err) => {
-        if(err){
-          res.status(500)
-          .json({message: 'Cannot save this user', error: err})
-          .end();
-        }// end if
-        res.json(user).end();
-      });
-    });
+      user = { ...user, ...req.body };
+      const data = await user.save();
+      return res.json(data).end();
+    } catch (error) {
+      res.status(404)
+      .json({message: 'Cannot find/update this user', error})
+      .end();
+    }
   },
-  PatchMeUpdatePassword: (req, res) => {
-    User.findOne({ _id: req.decoded.id })
-    .select('username password')
-    .exec((err, user) => {
-      if(err){
-        res.status(404)
-        .json({message: 'Cannot find this user', error: err})
-        .end();
-      }// end if
-
+  PatchMeUpdatePassword: async (req, res) => {
+    try {
+      const user = await User.findOne({ _id: req.decoded.id })
+      .select('username password')
+      .exec();
       // we check if the password match
       if(user.comparePassword(req.body.old_password)){
         if(req.body.password === req.body.conf_password && req.body.password.length > 7){
           user.password = req.body.password;
-          user.save((err) => {
-            if(err){
-              res.status(500)
-              .json({message: 'Cannot save the new password', error: err})
-              .end();
-            } else {
-              res.json({message: 'The password has been updated'});
-            }
-          });
+          await user.save();
+          return res.json({message: 'The password has been updated'}).end();
         } else {
-          res.status(500)
-          .json({message: 'The two passwords do not match or one of them is too short'})
-          .end();
+          throw new Error('The two passwords do not match or one of them is too short');
         }
-      } else {
-        res.status(500)
+      }
+      return res
+        .status(500)
         .json({message: 'The current password is not correct'})
         .end();
-      }// end if
-    });
+    } catch (error) {
+      res.status(404)
+        .json({message: 'Cannot find this user', error})
+        .end();
+    }
   }
 }
 
