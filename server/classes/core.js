@@ -30,14 +30,10 @@ class Core{
   /**
    * Create db connection
    */
-  async dbConnect(){
+  async dbConnect(silent = false){
     const databaseUri = this.getConnectionString();
     try {
-      // mongoose.Promise = require('bluebird');
-      this.db = await mongoose.connect(databaseUri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      });
+      this.db = await mongoose.connect(databaseUri, {});
       if (!silent) {
         console.log('connected');
       }

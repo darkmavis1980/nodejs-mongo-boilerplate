@@ -6,19 +6,19 @@ This is a simple Node.js boilerplate that uses Express.js, MongoDB with Mongoose
 
 To start the server, and it's the first run, you need to build it first with:
 
-```bash
+```ba
 docker-compose build
 ```
 
 And then you can simply start it with:
 
-```bash
+```ba
 docker-compose up
 ```
 
 To access to the console of each container, you can run this command:
 
-```bash
+```sh
 // access to the web container
 $ docker-compose exec web /bin/bash
 
@@ -97,7 +97,7 @@ mongodump --out <path-to-backup-folder>
 This will backup all the databases in the folder you passed in the arguments. If you want to backup one single database, you have to pass the `--db <dbname>` in the arguments. You can even trim down the backup to a single collection, just use the `--collection <collectionName>` attribute in addition to the others.
 Here a few examples with all the cases:
 
-```
+```sh
 // backup all the databases
 mongodump --out /data/backup/
 
@@ -118,13 +118,13 @@ docker-compose exec -T mongo sh -c 'mongodump --host=localhost -u <username> -p 
 
 Restoring the database is essentially the same, where the only difference is that the command is expecting at least a value, which is the path of the files to restore, so if we stored out backup files in the `/data/backup` folder, to restore anything it's in that path, you just have to run the following command:
 
-```
+```sh
 mongorestore <path-to-backup-folder>
 ```
 
 And if you want to restore one database, or even one collection of a database, it works exactly like the `mongodump` command, but here you can find some examples:
 
-```
+```sh
 // restore all the databases
 mongorestore /data/backup/
 
@@ -145,10 +145,10 @@ docker-compose exec -T mongo sh -c 'mongorestore --nsInclude=mydb.* --host=local
 
 ## Helpful links
 
-* [nodemailer with Amazon SES](https://nodemailer.com/transports/ses/)
-* [Install MongoDB on Ubuntu](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/)
-* [Install MongoDB on RedHat/Centos](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/)
-* [Install MongoDB on Amazon Linux](https://docs.mongodb.com/v3.4/tutorial/install-mongodb-on-amazon/)
-* [How to Install MongoDB on Ubuntu 16.04](https://www.digitalocean.com/community/tutorials/how-to-install-mongodb-on-ubuntu-16-04)
-* [Robomongo - GUI for MongoDB on Mac](https://robomongo.org/download)
-* [Backup And Restore with MongoDB](https://docs.mongodb.com/manual/tutorial/backup-and-restore-tools/)
+- [nodemailer with Amazon SES](https://nodemailer.com/transports/ses/)
+- [Install MongoDB on Ubuntu](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/)
+- [Install MongoDB on RedHat/Centos](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/)
+- [Install MongoDB on Amazon Linux](https://docs.mongodb.com/v3.4/tutorial/install-mongodb-on-amazon/)
+- [How to Install MongoDB on Ubuntu 16.04](https://www.digitalocean.com/community/tutorials/how-to-install-mongodb-on-ubuntu-16-04)
+- [Robomongo - GUI for MongoDB on Mac](https://robomongo.org/download)
+- [Backup And Restore with MongoDB](https://docs.mongodb.com/manual/tutorial/backup-and-restore-tools/)
