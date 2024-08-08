@@ -10,7 +10,6 @@ const isAdmin = require('../middlewares/middlewares').isAdmin;
 const isAuthenticated = require('../middlewares/middlewares').isAuthenticated;
 
 module.exports = (app, express) => {
-  app.use(require('express-session')({ secret: secretKey, resave: true, saveUninitialized: true }));
   app.use(passport.initialize());
   app.use(passport.session());
 
