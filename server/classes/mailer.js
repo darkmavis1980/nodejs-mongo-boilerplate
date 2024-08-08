@@ -6,12 +6,20 @@ const mailService = config.get('mail.service') || 'SES';
 
 const transports = {
   SES: () => {
-    const aws = require('aws-sdk');
+    const {
+      SES
+    } = require('@aws-sdk/client-ses');
     return nodemailer.createTransport({
-      SES: new aws.SES({
-        accessKeyId: config.get('aws.accessKeyId'),
-        secretAccessKey: config.get('aws.secretAccessKey'),
+      SES: new SES({
+        credentials: {
+          accessKeyId: config.get('aws.accessKeyId'),
+          secretAccessKey: config.get('aws.secretAccessKey')
+        },
+
         region: config.get('aws.region'),
+
+        // The key apiVersion is no longer supported in v3, and can be removed.
+        // @deprecated The client uses the "latest" apiVersion.
         apiVersion: '2010-12-01'
       })
     });

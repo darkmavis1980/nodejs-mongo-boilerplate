@@ -15,7 +15,7 @@
   "author": "Alessio Michelini",
   "license": "ISC",
   "dependencies": {
-    "aws-sdk": "^2.1671.0",
+    "@aws-sdk/client-ses": "^3.624.0",
     "bcrypt-nodejs": "0.0.3",
     "config": "^3.3.12",
     "connect-mongo": "^5.1.0",
